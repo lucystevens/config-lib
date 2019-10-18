@@ -1,12 +1,21 @@
-package uk.co.lukestevens.config;
+package uk.co.lukestevens.config.models;
 
+import uk.co.lukestevens.config.Config;
+import uk.co.lukestevens.config.ConfigException;
+import uk.co.lukestevens.config.KeyParser;
 import uk.co.lukestevens.encryption.EncryptionService;
 
 /**
  * @author luke.stevens
  */
-public abstract class AppConfig implements Config {
+public abstract class BaseConfig implements Config {
 	
+	protected final EncryptionService service;
+		
+	protected BaseConfig(EncryptionService service) {
+		this.service = service;
+	}
+
 	public abstract Object get(String key);
 	
 	@Override
@@ -54,7 +63,7 @@ public abstract class AppConfig implements Config {
 	}
 	
 	@Override
-	public String getEncrypted(String key, EncryptionService service) {
+	public String getEncrypted(String key) {
 		return this.getParsedValue(key, service::decrypt);
 	}
 	
