@@ -1,12 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>uk.co.lukestevens</groupId>
-  <artifactId>config-lib</artifactId>
-  <version>1.0.0-beta</version>
-  <name>config-lib</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>uk.co.lukestevens</groupId>
+	<artifactId>config-lib</artifactId>
+	<version>1.0.0-beta</version>
+	<name>config-lib</name>
 
 	<properties>
-		<junit.jupiter.version>5.4.0</junit.jupiter.version>
+		<junit.jupiter.version>5.5.2</junit.jupiter.version>
 	</properties>
 
 	<build>
@@ -31,26 +33,36 @@
 	</build>
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>uk.co.lukestevens</groupId>
 			<artifactId>base-lib</artifactId>
 			<version>1.0.0-beta</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.co.lukestevens</groupId>
 			<artifactId>db-lib</artifactId>
 			<version>1.0.0-beta</version>
+			<scope>provided</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>42.2.6</version>
+			<groupId>uk.co.lukestevens</groupId>
+			<artifactId>base-lib</artifactId>
+			<version>1.0.0-beta</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>uk.co.lukestevens</groupId>
+			<artifactId>db-lib</artifactId>
+			<version>1.0.0-beta</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
@@ -59,7 +71,6 @@
 			<version>1.4.199</version>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- JUnit test dependencies -->
 		<dependency>
@@ -80,6 +91,7 @@
 			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
-  
+
 </project>

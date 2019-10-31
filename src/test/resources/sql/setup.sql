@@ -6,7 +6,7 @@ CREATE TABLE application_config(
 	key VARCHAR NOT NULL,
 	value VARCHAR NOT NULL,
 	application VARCHAR NOT NULL,
-	ttl BIGINT NOT NULL
+	refresh_rate BIGINT NOT NULL
 );
 
 CREATE TABLE site_config(
@@ -14,5 +14,5 @@ CREATE TABLE site_config(
 	key VARCHAR NOT NULL,
 	value VARCHAR NOT NULL,
 	site VARCHAR NOT NULL,
-	ttl BIGINT NOT NULL
+	refresh_rate BIGINT NOT NULL
 );

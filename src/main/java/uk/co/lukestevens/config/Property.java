@@ -2,6 +2,8 @@ package uk.co.lukestevens.config;
 
 import java.util.Date;
 
+import uk.co.lukestevens.utils.Dates;
+
 public class Property {
 	
 	private String key;
@@ -28,7 +30,7 @@ public class Property {
 	}
 	
 	public boolean isExpired() {
-		return expiry != null && expiry.before(new Date());
+		return expiry != null && expiry.before(Dates.now());
 	}
 
 }

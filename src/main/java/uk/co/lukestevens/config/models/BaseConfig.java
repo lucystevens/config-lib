@@ -1,5 +1,8 @@
 package uk.co.lukestevens.config.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import uk.co.lukestevens.config.Config;
 import uk.co.lukestevens.config.ConfigException;
 import uk.co.lukestevens.config.KeyParser;
@@ -95,6 +98,24 @@ public abstract class BaseConfig implements Config {
 	@Override
 	public boolean getAsBooleanOrDefault(String key, boolean def) {
 		return this.getParsedValueOrDefault(key, val -> val.equalsIgnoreCase("true"), def);
+	}
+	
+	@Override
+	public List<String> getAsList(String key) {
+		return this.getParsedValue(key, this::parseList);
+	}
+	
+	@Override
+	public List<String> getAsListOrDefault(String key, List<String> def) {
+		return this.getParsedValueOrDefault(key, this::parseList, def);
+	}
+	
+	List<String> parseList(String value){
+		List<String> result = new ArrayList<>();
+		for(String part : value.split(",")) {
+			result.add(part.trim());
+		}
+		return result;
 	}
 	
 }
