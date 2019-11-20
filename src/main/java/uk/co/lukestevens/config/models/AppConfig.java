@@ -6,25 +6,37 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import uk.co.lukestevens.encryption.EncryptionService;
+import uk.co.lukestevens.utils.Functions;
 
+/**
+ * A config implementation that takes a prioritised list of config sources
+ * and checks each one in turn when fetching a config.
+ * 
+ * @author Luke Stevens
+ */
 public class AppConfig extends BaseConfig {
 	
-	private final List<DerivedConfig> configs;
+	private final List<ConfigSource> configs;
 	
-	public AppConfig(EncryptionService service, List<DerivedConfig> configs) {
+	/**
+	 * Creates a new configuration by fetching configs from a prioritised list of config sources
+	 * @param service The service to use to decrypt encrypted files
+	 * @param configs A prioritised list of config sources
+	 */
+	public AppConfig(EncryptionService service, List<ConfigSource> configs) {
 		super(service);
 		this.configs = configs;
 	}
 
 	@Override
 	public Set<Entry<Object, Object>> entrySet() {
-		return this.configs.stream().map(DerivedConfig::entrySet).flatMap(Set::stream).collect(Collectors.toSet());
+		return this.configs.stream().map(ConfigSource::entrySet).flatMap(Set::stream).collect(Collectors.toMap(Entry::getKey, Entry::getValue, Functions::pickFirst)).entrySet();
 	}
 
 	@Override
 	public Object get(String key) {
 		Object result = null;
-		for(DerivedConfig config : configs) {
+		for(ConfigSource config : configs) {
 			result = config.get(key);
 			if(result != null) {
 				return result;

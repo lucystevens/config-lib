@@ -12,11 +12,22 @@ import uk.co.lukestevens.config.Property;
 import uk.co.lukestevens.config.services.PropertyService;
 import uk.co.lukestevens.encryption.EncryptionService;
 
-public class DatabaseConfig extends BaseConfig implements DerivedConfig {
+
+/**
+ * A config implementation that loads properties from a database
+ * 
+ * @author Luke Stevens
+ */
+public class DatabaseConfig extends BaseConfig implements ConfigSource {
 	
 	private final Map<String, Property> config = new HashMap<>();
 	private final PropertyService service;
 	
+	/**
+	 * Creates a new configuration by loading properties from a database using a service
+	 * @param service the PropertyService too use to load properties from the database
+	 * @param encryption The service to use to decrypt encrypted files
+	 */
 	public DatabaseConfig(PropertyService service, EncryptionService encryption) {
 		super(encryption);
 		this.service = service;	

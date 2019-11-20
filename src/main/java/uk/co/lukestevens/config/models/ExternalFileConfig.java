@@ -12,7 +12,13 @@ import uk.co.lukestevens.utils.Dates;
 import java.util.Properties;
 import java.util.Set;
 
-public class ExternalFileConfig implements DerivedConfig {
+/**
+ * A derived config implementation that loads properties
+ * from an external file outside of the application
+ * 
+ * @author Luke Stevens
+ */
+public class ExternalFileConfig implements ConfigSource {
 
 	private final Properties props = new Properties();
 	private final File file;
@@ -20,6 +26,12 @@ public class ExternalFileConfig implements DerivedConfig {
 	
 	private Date expiry = Dates.now();
 	
+	/**
+	 * Creates a new configuration from an external file
+	 * @param file The external file to load properties from
+	 * @param refreshRate The time, in milliseconds, to wait
+	 * before reloading the configuration from file
+	 */
 	public ExternalFileConfig(File file, long refreshRate) {
 		this.file = file;
 		this.refreshRate = refreshRate;
@@ -38,6 +50,10 @@ public class ExternalFileConfig implements DerivedConfig {
 		return props.get(key);
 	}
 	
+	/*
+	 * Try to load the config file, and silently fail
+	 * if an exception is thrown
+	 */
 	void safeLoad() {
 		try {
 			this.load();
@@ -49,8 +65,9 @@ public class ExternalFileConfig implements DerivedConfig {
 	@Override
 	public void load() throws IOException {
 		this.props.clear();
-		InputStream input = new FileInputStream(file);
-		this.props.load(input);
+		try(InputStream input = new FileInputStream(file)){
+			this.props.load(input);
+		}
 		this.expiry = new Date(Dates.millis() + this.refreshRate);
 	}
 

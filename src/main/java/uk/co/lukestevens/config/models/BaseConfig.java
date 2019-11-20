@@ -9,16 +9,29 @@ import uk.co.lukestevens.config.KeyParser;
 import uk.co.lukestevens.encryption.EncryptionService;
 
 /**
- * @author luke.stevens
+ * A base implementation of the Config interface that defines 
+ * the advanced config parsing method, and relies on further 
+ * implementations to provide only the basic 'get' method for
+ * a property.
+ * 
+ * @author Luke Stevens
  */
 public abstract class BaseConfig implements Config {
 	
 	protected final EncryptionService service;
-		
+	
+	/**
+	 * @param service The service used to decrypt encrypted properties
+	 */
 	protected BaseConfig(EncryptionService service) {
 		this.service = service;
 	}
 
+	/**
+	 * Get a property value given the key
+	 * @param key The key to retrieve a property for
+	 * @return The value that corresponds with the given key
+	 */
 	public abstract Object get(String key);
 	
 	@Override
@@ -110,6 +123,9 @@ public abstract class BaseConfig implements Config {
 		return this.getParsedValueOrDefault(key, this::parseList, def);
 	}
 	
+	/*
+	 * Helper method for parsing a list from a string
+	 */
 	List<String> parseList(String value){
 		List<String> result = new ArrayList<>();
 		for(String part : value.split(",")) {

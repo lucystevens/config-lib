@@ -4,12 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class DatabaseSiteConfigService implements SiteConfigService{
+/**
+ * A SiteConfigService implementation that loads configs using a provider function
+ * 
+ * @author Luke Stevens
+ */
+public class GenericSiteConfigService implements SiteConfigService{
 	
 	private final Map<String, Config> configs = new HashMap<>();
 	private final Function<String, Config> siteConfigProvider;
 	
-	public DatabaseSiteConfigService(Function<String, Config> siteConfigProvider) {
+	/**
+	 * Creates a new GenericSiteConfigService
+	 * @param siteConfigProvider A provider function that,
+	 * when supplied with a site name, returns a config for that site
+	 */
+	public GenericSiteConfigService(Function<String, Config> siteConfigProvider) {
 		this.siteConfigProvider = siteConfigProvider;
 	}
 
