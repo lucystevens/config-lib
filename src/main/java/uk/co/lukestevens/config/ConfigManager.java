@@ -26,7 +26,7 @@ public class ConfigManager {
 	
 	/**
 	 * Creates a new ConfigManager
-	 * @param configFile The config file to use
+	 * @param configFile The external config file to use
 	 * @param encryption The service to use to decrypt any encryptyed configs
 	 */
 	public ConfigManager(File configFile, EncryptionService encryption) {
@@ -40,6 +40,10 @@ public class ConfigManager {
 		}
 	}
 	
+	/**
+	 * Gets the database config (if applicable) from the base config
+	 * @return A database config instance, or null if not enabled
+	 */
 	private DatabaseConfig parseDatabaseConfig() {
 		boolean databaseEnabled = config.getAsBooleanOrDefault("config.database.enabled", false);
 		if(!databaseEnabled) {

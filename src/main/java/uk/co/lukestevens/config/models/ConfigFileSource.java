@@ -10,11 +10,21 @@ import java.util.Set;
 
 import uk.co.lukestevens.encryption.EncryptionService;
 
+/**
+ * A config source implementation for resolving the base config source from file
+ * 
+ * @author Luke Stevens
+ */
 public class ConfigFileSource extends BaseConfig implements ConfigSource {
 	
 	private final File file;
 	private final Properties props = new Properties();
 
+	/**
+	 * Creates a new config file source
+	 * @param file The config file to load properties from
+	 * @param service The encryption service to use to decrypt sensitive files
+	 */
 	public ConfigFileSource(File file, EncryptionService service) {
 		super(service);
 		this.file = file;
@@ -30,6 +40,11 @@ public class ConfigFileSource extends BaseConfig implements ConfigSource {
 		return props.get(key);
 	}
 	
+	/**
+	 * Loads an additional config file into this source
+	 * @param configFile The config file to load properties from
+	 * @throws IOException
+	 */
 	public void load(File configFile) throws IOException {
 		try(InputStream input = new FileInputStream(configFile)){
 			if(input != null) {
