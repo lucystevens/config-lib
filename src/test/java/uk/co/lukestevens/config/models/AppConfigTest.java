@@ -24,32 +24,23 @@ public class AppConfigTest {
 	
 	@BeforeEach
 	public void setup() {
-		List<ConfigSource> sources = new ArrayList<>();
+		Properties base = new Properties();
+		base.setProperty("string.property", "a value");
+		base.setProperty("boolean.property", "false");
+		base.setProperty("encrypted.property", "secretkey (encrypted)");
 		
-		Properties props1 = new Properties();
-		props1.setProperty("string.property", "a value");
-		props1.setProperty("boolean.property", "true");
-		sources.add(new MockConfigSource(props1));
-		
-		Properties props2 = new Properties();
-		props2.setProperty("string.property", "backup value");
-		props2.setProperty("encrypted.property", "secretkey (encrypted)");
-		sources.add(new MockConfigSource(props2));
-		
-		Properties props3 = new Properties();
-		props3.setProperty("string.property", "final chance value");
-		props3.setProperty("encrypted.property", "publickey (encrypted)");
-		props3.setProperty("double.property", "27.45");
-		props3.setProperty("boolean.property", "false");
-		sources.add(new MockConfigSource(props3));
+		Properties db = new Properties();
+		db.setProperty("string.property", "database value");
+		db.setProperty("double.property", "27.45");
+		db.setProperty("boolean.property", "true");
 
 		EncryptionService encryption = new MockEncryptionService();
-		this.config = new AppConfig(encryption, sources);
+		this.config = new AppConfig(encryption, new MockConfigSource(base), new MockConfigSource(db));
 	}
 	
 	@Test
 	public void testGetProperty() {
-		assertEquals("a value", config.getAsString("string.property"));
+		assertEquals("database value", config.getAsString("string.property"));
 		assertTrue(config.getAsBoolean("boolean.property"));
 		assertEquals("secretkey", config.getEncrypted("encrypted.property"));
 		assertEquals(27.45, config.getAsDouble("double.property"));
@@ -74,7 +65,7 @@ public class AppConfigTest {
 		assertEquals("secretkey (encrypted)", entryList.get(2).getValue());
 		
 		assertEquals("string.property", entryList.get(3).getKey());
-		assertEquals("a value", entryList.get(3).getValue());
+		assertEquals("database value", entryList.get(3).getValue());
 	}
 
 }

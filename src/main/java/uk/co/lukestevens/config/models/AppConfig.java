@@ -1,48 +1,53 @@
 package uk.co.lukestevens.config.models;
 
 import java.util.Map.Entry;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import uk.co.lukestevens.encryption.EncryptionService;
-import uk.co.lukestevens.utils.Functions;
 
-/**
- * A config implementation that takes a prioritised list of config sources
- * and checks each one in turn when fetching a config.
- * 
- * @author Luke Stevens
- */
 public class AppConfig extends BaseConfig {
 	
-	private final List<ConfigSource> configs;
+	private final ConfigSource base;
+	private final ConfigSource db;
 	
-	/**
-	 * Creates a new configuration by fetching configs from a prioritised list of config sources
-	 * @param service The service to use to decrypt encrypted files
-	 * @param configs A prioritised list of config sources
-	 */
-	public AppConfig(EncryptionService service, List<ConfigSource> configs) {
+	public AppConfig(EncryptionService service, ConfigSource base) {
+		this(service, base, null);
+	}
+	
+	public AppConfig(EncryptionService service, ConfigSource base, ConfigSource db) {
 		super(service);
-		this.configs = configs;
+		this.base = base;
+		this.db = db;
 	}
 
 	@Override
 	public Set<Entry<Object, Object>> entrySet() {
-		return this.configs.stream().map(ConfigSource::entrySet).flatMap(Set::stream).collect(Collectors.toMap(Entry::getKey, Entry::getValue, Functions::pickFirst)).entrySet();
+		HashMap<Object, Object> entryMap = new HashMap<>();
+		for(Entry<Object, Object> entry : base.entrySet()) {
+			entryMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		if(db != null) {
+			for(Entry<Object, Object> entry : db.entrySet()) {
+				entryMap.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return entryMap.entrySet();
 	}
 
 	@Override
 	public Object get(String key) {
 		Object result = null;
-		for(ConfigSource config : configs) {
-			result = config.get(key);
-			if(result != null) {
-				return result;
-			}
+		if(db != null) {
+			result = db.get(key);;
 		}
-		return null;
+		
+		if(result == null) {
+			result = base.get(key);
+		}
+
+		return result;
 	}
 
 }

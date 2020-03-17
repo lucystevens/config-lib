@@ -53,7 +53,7 @@ public class DatabasePropertyService implements PropertyService {
 
 	@Override
 	public List<Property> load() throws IOException{
-		String baseSql = "SELECT key, value, refresh_rate FROM %s WHERE %s IN('*', ?) ORDER BY %s!=?;";
+		String baseSql = "SELECT key, value, refresh_rate FROM config.%s WHERE %s IN('*', ?) ORDER BY %s!=?;";
 		String sql = String.format(baseSql, tableName, columnName, columnName);	
 		try(DatabaseResult dbr = db.query(sql, name, "*")){
 			return dbr.parseResultSet(this::parse);
@@ -64,7 +64,7 @@ public class DatabasePropertyService implements PropertyService {
 
 	@Override
 	public Property get(String key) {
-		String baseSql = "SELECT key, value, refresh_rate FROM %s WHERE %s IN('*', ?) AND key=? ORDER BY %s=?;";
+		String baseSql = "SELECT key, value, refresh_rate FROM config.%s WHERE %s IN('*', ?) AND key=? ORDER BY %s=?;";
 		String sql = String.format(baseSql, tableName, columnName, columnName);	
 		try(DatabaseResult dbr = db.query(sql, name, key, "*")){
 			List<Property> props = dbr.parseResultSet(this::parse);

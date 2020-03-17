@@ -1,4 +1,4 @@
-INSERT INTO site_config VALUES
+INSERT INTO config.site_config VALUES
 (default, 'int.test.key', '33',  'test', 10),
 (default, 'boolean.test.key', 'true',  'test', 20),
 (default, 'string.test.key', 'iamakey',  'test', 30),

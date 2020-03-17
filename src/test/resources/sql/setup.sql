@@ -1,7 +1,9 @@
-DROP TABLE IF EXISTS application_config;
-DROP TABLE IF EXISTS site_config;
+CREATE SCHEMA IF NOT EXISTS config;
 
-CREATE TABLE application_config(
+DROP TABLE IF EXISTS config.application_config;
+DROP TABLE IF EXISTS config.site_config;
+
+CREATE TABLE config.application_config(
 	id SERIAL PRIMARY KEY,
 	key VARCHAR NOT NULL,
 	value VARCHAR NOT NULL,
@@ -9,7 +11,7 @@ CREATE TABLE application_config(
 	refresh_rate BIGINT NOT NULL
 );
 
-CREATE TABLE site_config(
+CREATE TABLE config.site_config(
 	id SERIAL PRIMARY KEY,
 	key VARCHAR NOT NULL,
 	value VARCHAR NOT NULL,
