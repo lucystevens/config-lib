@@ -2,6 +2,7 @@ package uk.co.lukestevens.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import uk.co.lukestevens.config.models.AppConfig;
 import uk.co.lukestevens.config.models.ConfigFileSource;
@@ -27,14 +28,22 @@ public class ConfigManager {
 	/**
 	 * Creates a new ConfigManager
 	 * @param configFile The external config file to use
-	 * @param encryption The service to use to decrypt any encryptyed configs
+	 * @param encryption The service to use to decrypt any encrypted configs
 	 */
 	public ConfigManager(File configFile, EncryptionService encryption) {
 		this.encryption = encryption;
 		this.config = new ConfigFileSource(configFile, encryption);
 		
+		// Load primary config
 		try {
 			this.config.load();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+		
+		// Load properties from maven
+		try (InputStream input = ConfigManager.class.getResourceAsStream("/conf/application.properties")){
+			this.config.load(input);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}

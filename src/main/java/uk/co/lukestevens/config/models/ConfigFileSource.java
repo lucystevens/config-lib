@@ -41,21 +41,21 @@ public class ConfigFileSource extends BaseConfig implements ConfigSource {
 	}
 	
 	/**
-	 * Loads an additional config file into this source
-	 * @param configFile The config file to load properties from
+	 * Loads additional config into this source from an inputstream
+	 * @param configFile The config stream to load properties from
 	 * @throws IOException
 	 */
-	public void load(File configFile) throws IOException {
-		try(InputStream input = new FileInputStream(configFile)){
-			if(input != null) {
-				this.props.load(input);
-			}
+	public void load(InputStream input) throws IOException {
+		if(input != null) {
+			this.props.load(input);
 		}
 	}
 
 	@Override
 	public void load() throws IOException {
-		this.load(this.file);
+		try(InputStream input = new FileInputStream(this.file)){
+			this.load(input);
+		}
 	}
 
 }
