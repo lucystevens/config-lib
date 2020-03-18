@@ -105,7 +105,7 @@ public class DatabasePropertyServiceTest {
 	
 	@Test
 	public void testGetOverridenProperty1() throws SQLException {
-		this.db.update("INSERT INTO config.site_config VALUES(default, ?, ?, ?, ?);", "global.test.key", "overiddenkey", "test", 12);
+		this.db.update("INSERT INTO core.site_config VALUES(default, ?, ?, ?, ?);", "global.test.key", "overiddenkey", "test", 12);
 		Date currentDate = new Date();
 		DateMocker.setCurrentDate(currentDate);
 		
@@ -121,7 +121,7 @@ public class DatabasePropertyServiceTest {
 	}
 	@Test
 	public void testGetOverridenProperty2() throws SQLException {
-		this.db.update("INSERT INTO config.site_config VALUES(default, ?, ?, ?, ?);", "string.test.key", "globalkey", "*", 100);
+		this.db.update("INSERT INTO core.site_config VALUES(default, ?, ?, ?, ?);", "string.test.key", "globalkey", "*", 100);
 		Date currentDate = new Date();
 		DateMocker.setCurrentDate(currentDate);
 		

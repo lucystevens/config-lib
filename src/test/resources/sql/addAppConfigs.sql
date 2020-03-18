@@ -1,4 +1,4 @@
-INSERT INTO config.application_config VALUES
+INSERT INTO core.application_config VALUES
 (default, 'int.property', '3',  'test', 10),
 (default, 'boolean.property', 'true',  'test', 10),
 (default, 'string.property', 'some string',  'test', 10),
