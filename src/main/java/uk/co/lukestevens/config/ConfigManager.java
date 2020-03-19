@@ -62,7 +62,7 @@ public class ConfigManager {
 		String databaseAlias = config.getAsStringOrDefault("config.database.alias", "config");
 		Database configDb = new ConfiguredDatabase(config, databaseAlias);
 		
-		String applicationName = config.getAsString("application.name");
+		String applicationName = config.getApplicationName();
 		PropertyService propertyService = DatabasePropertyService.forApplication(configDb, applicationName);
 		return new DatabaseConfig(propertyService, encryption);
 	}

@@ -32,8 +32,8 @@ public class ConfigManagerTest {
 		assertEquals(3, config.getAsInt("integer.property"));
 		assertNull(config.getAsStringOrDefault("missing.property", null));
 		
-		assertEquals("config-lib-test", config.getAsString("application.name"));
-		assertEquals("1.0.0-beta", config.getAsString("application.version"));
+		assertEquals("config-lib-test", config.getApplicationName());
+		assertEquals("1.0.0-beta", config.getApplicationVersion());
 	}
 
 }

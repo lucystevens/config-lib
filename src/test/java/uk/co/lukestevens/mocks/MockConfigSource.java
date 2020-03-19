@@ -5,13 +5,16 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import uk.co.lukestevens.config.models.BaseConfig;
 import uk.co.lukestevens.config.models.ConfigSource;
+import uk.co.lukestevens.encryption.IgnoredEncryptionService;
 
-public class MockConfigSource implements ConfigSource{
+public class MockConfigSource extends BaseConfig implements ConfigSource{
 	
 	final Properties props;
 	
 	public MockConfigSource(Properties props) {
+		super(new IgnoredEncryptionService());
 		this.props = props;
 	}
 

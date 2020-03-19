@@ -26,6 +26,16 @@ public abstract class BaseConfig implements Config {
 	protected BaseConfig(EncryptionService service) {
 		this.service = service;
 	}
+	
+	@Override
+	public String getApplicationName() {
+		return this.getAsString("application.name");
+	}
+	
+	@Override
+	public String getApplicationVersion() {
+		return this.getAsString("application.version");
+	}
 
 	/**
 	 * Get a property value given the key
