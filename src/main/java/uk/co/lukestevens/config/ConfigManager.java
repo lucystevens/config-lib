@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import uk.co.lukestevens.config.annotations.ConfigFile;
 import uk.co.lukestevens.config.models.AppConfig;
 import uk.co.lukestevens.config.models.ConfigFileSource;
 import uk.co.lukestevens.config.models.DatabaseConfig;
@@ -20,6 +25,7 @@ import uk.co.lukestevens.jdbc.Database;
  * 
  * @author Luke Stevens
  */
+@Singleton
 public class ConfigManager {
 	
 	private final ConfigFileSource config;
@@ -30,7 +36,8 @@ public class ConfigManager {
 	 * @param configFile The external config file to use
 	 * @param encryption The service to use to decrypt any encrypted configs
 	 */
-	public ConfigManager(File configFile, EncryptionService encryption) {
+	@Inject
+	public ConfigManager(@ConfigFile File configFile, EncryptionService encryption) {
 		this.encryption = encryption;
 		this.config = new ConfigFileSource(configFile, encryption);
 		

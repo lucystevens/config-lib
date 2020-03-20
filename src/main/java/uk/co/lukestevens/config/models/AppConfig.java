@@ -1,6 +1,9 @@
 package uk.co.lukestevens.config.models;
 
 import java.util.Map.Entry;
+
+import javax.inject.Singleton;
+
 import java.util.HashMap;
 import java.util.Set;
 import uk.co.lukestevens.encryption.EncryptionService;
@@ -13,6 +16,7 @@ import uk.co.lukestevens.encryption.EncryptionService;
  * 
  * @author Luke Stevens
  */
+@Singleton
 public class AppConfig extends BaseConfig {
 	
 	private final ConfigSource base;

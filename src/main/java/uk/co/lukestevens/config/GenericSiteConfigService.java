@@ -4,11 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.inject.Singleton;
+
 /**
  * A SiteConfigService implementation that loads configs using a provider function
  * 
  * @author Luke Stevens
  */
+@Singleton
 public class GenericSiteConfigService implements SiteConfigService{
 	
 	private final Map<String, Config> configs = new HashMap<>();
