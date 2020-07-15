@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import uk.co.lukestevens.config.Property;
-import uk.co.lukestevens.mocks.DateMocker;
-import uk.co.lukestevens.test.db.TestDatabase;
+import uk.co.lukestevens.testing.mocks.DateMocker;
+import uk.co.lukestevens.testing.db.TestDatabase;
 
 public class DatabasePropertyServiceTest {
 	

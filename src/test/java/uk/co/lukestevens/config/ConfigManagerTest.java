@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import uk.co.lukestevens.encryption.EncryptionService;
-import uk.co.lukestevens.mocks.MockEncryptionService;
+import uk.co.lukestevens.testing.mocks.MockEncryptionService;
 
 public class ConfigManagerTest {
 	

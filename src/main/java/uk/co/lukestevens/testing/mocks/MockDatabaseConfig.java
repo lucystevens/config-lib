@@ -1,20 +1,18 @@
-package uk.co.lukestevens.mocks;
+package uk.co.lukestevens.testing.mocks;
 
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import uk.co.lukestevens.config.models.BaseConfig;
-import uk.co.lukestevens.config.models.ConfigSource;
-import uk.co.lukestevens.encryption.IgnoredEncryptionService;
+import uk.co.lukestevens.config.models.DatabaseConfig;
 
-public class MockConfigSource extends BaseConfig implements ConfigSource{
+public class MockDatabaseConfig extends DatabaseConfig{
 	
 	final Properties props;
 	
-	public MockConfigSource(Properties props) {
-		super(new IgnoredEncryptionService());
+	public MockDatabaseConfig(Properties props) {
+		super(null, null);
 		this.props = props;
 	}
 
