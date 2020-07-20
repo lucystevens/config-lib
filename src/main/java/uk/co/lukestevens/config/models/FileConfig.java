@@ -4,40 +4,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
-
-import uk.co.lukestevens.encryption.EncryptionService;
 
 /**
  * A config source implementation for resolving the base config source from file
  * 
  * @author Luke Stevens
  */
-public class ConfigFileSource extends BaseConfig implements ConfigSource {
+public class FileConfig extends PropertiesConfig {
 	
 	private final File file;
-	private final Properties props = new Properties();
 
 	/**
 	 * Creates a new config file source
 	 * @param file The config file to load properties from
-	 * @param service The encryption service to use to decrypt sensitive files
 	 */
-	public ConfigFileSource(File file, EncryptionService service) {
-		super(service);
+	public FileConfig(File file) {
+		super(new Properties());
 		this.file = file;
-	}
-
-	@Override
-	public Set<Entry<Object, Object>> entrySet() {
-		return props.entrySet();
-	}
-
-	@Override
-	public Object get(String key) {
-		return props.get(key);
 	}
 	
 	/**

@@ -6,7 +6,6 @@ import java.util.List;
 import uk.co.lukestevens.config.Config;
 import uk.co.lukestevens.config.ConfigException;
 import uk.co.lukestevens.config.KeyParser;
-import uk.co.lukestevens.encryption.EncryptionService;
 
 /**
  * A base implementation of the Config interface that defines 
@@ -18,49 +17,31 @@ import uk.co.lukestevens.encryption.EncryptionService;
  */
 public abstract class BaseConfig implements Config {
 	
-	protected final EncryptionService service;
-	
-	/**
-	 * @param service The service used to decrypt encrypted properties
-	 */
-	protected BaseConfig(EncryptionService service) {
-		this.service = service;
-	}
-	
-	@Override
-	public String getApplicationName() {
-		return this.getAsString("application.name");
-	}
-	
-	@Override
-	public String getApplicationVersion() {
-		return this.getAsString("application.version");
-	}
 
 	/**
 	 * Get a property value given the key
 	 * @param key The key to retrieve a property for
 	 * @return The value that corresponds with the given key
 	 */
-	public abstract Object get(String key);
+	public abstract String get(String key);
 	
 	@Override
 	public String getAsString(String key){
-		Object value = this.get(key);
+		String value = this.get(key);
 		if(value == null) {
 			throw new ConfigException(key);
 		} else {
-			return value.toString();
+			return value;
 		}
 	}
 	
 	@Override
 	public String getAsStringOrDefault(String key, String def){
-		Object value = this.get(key);
+		String value = this.get(key);
 		if(value == null) {
 			return def;
 		} else {
-			return value.toString();
+			return value;
 		}
 	}
 	
@@ -76,7 +57,7 @@ public abstract class BaseConfig implements Config {
 	
 	@Override
 	public <T> T getParsedValueOrDefault(String key, KeyParser<T> parser, T def) {
-		String value = this.getAsStringOrDefault(key, null);
+		String value = this.get(key);
 		if(value == null) {
 			return def;
 		}
@@ -86,11 +67,6 @@ public abstract class BaseConfig implements Config {
 		} catch(Exception e) {
 			throw new ConfigException(key, e);
 		}
-	}
-	
-	@Override
-	public String getEncrypted(String key) {
-		return this.getParsedValue(key, service::decrypt);
 	}
 	
 	@Override
