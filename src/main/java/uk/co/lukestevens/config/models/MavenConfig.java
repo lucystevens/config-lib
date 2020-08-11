@@ -12,6 +12,9 @@ import java.util.Properties;
 public class MavenConfig extends PropertiesConfig {
 	
 	private static final String MAVEN_PROPERTIES = "/mvn.properties";
+	public static final String NAME = "application.name";
+	public static final String VERSION = "application.version";
+	public static final String GROUP = "application.group";
 
 	public MavenConfig() {
 		super(new Properties());

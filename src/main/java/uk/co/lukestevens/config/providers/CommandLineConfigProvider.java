@@ -1,22 +1,22 @@
-package uk.co.lukestevens.config.parsers;
+package uk.co.lukestevens.config.providers;
 
 import java.lang.reflect.Field;
 
 import org.apache.commons.cli.CommandLine;
 
-import uk.co.lukestevens.cli.CommandLineOption;
+import uk.co.lukestevens.config.annotations.ConfigOption;
 
-public class CommandLineFieldParser implements FieldParser {
+public class CommandLineConfigProvider implements ConfigValueProvider {
 	
 	final CommandLine commandLine;
 	
-	public CommandLineFieldParser(CommandLine commandLine) {
+	public CommandLineConfigProvider(CommandLine commandLine) {
 		this.commandLine = commandLine;
 	}
 
 	@Override
-	public String parse(Field field) {
-		CommandLineOption option = field.getAnnotation(CommandLineOption.class);
+	public String getConfigValue(Field field) {
+		ConfigOption option = field.getAnnotation(ConfigOption.class);
 		boolean hasArg = !(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class));
 		return hasArg? 
 				commandLine.getOptionValue(option.opt()) : 

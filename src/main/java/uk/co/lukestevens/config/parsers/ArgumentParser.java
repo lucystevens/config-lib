@@ -1,4 +1,4 @@
-package uk.co.lukestevens.cli.args;
+package uk.co.lukestevens.config.parsers;
 
 /**
  * An interface defining a method to parse a String value

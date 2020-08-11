@@ -5,30 +5,32 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Option.Builder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import uk.co.lukestevens.cli.CommandLineOption;
-import uk.co.lukestevens.cli.CommandLineUsage;
-import uk.co.lukestevens.cli.args.ArgumentParser;
-import uk.co.lukestevens.cli.args.ArgumentParserProvider;
+import uk.co.lukestevens.config.annotations.ConfigOption;
+import uk.co.lukestevens.config.annotations.SetupClass;
 import uk.co.lukestevens.config.models.CompoundConfig;
 import uk.co.lukestevens.config.models.FileConfig;
 import uk.co.lukestevens.config.models.MavenConfig;
-import uk.co.lukestevens.config.parsers.CommandLineFieldParser;
-import uk.co.lukestevens.config.parsers.ConfigFieldParser;
-import uk.co.lukestevens.config.parsers.EnvironmentVariableFieldParser;
-import uk.co.lukestevens.config.parsers.FieldParser;
+import uk.co.lukestevens.config.parsers.ArgumentParser;
+import uk.co.lukestevens.config.parsers.ArgumentParserProvider;
+import uk.co.lukestevens.config.providers.CommandLineConfigProvider;
+import uk.co.lukestevens.config.providers.PropertiesConfigProvider;
+import uk.co.lukestevens.config.providers.EnvironmentVariableConfigProvider;
+import uk.co.lukestevens.config.providers.ConfigValueProvider;
 import uk.co.lukestevens.utils.ReflectionUtils;
 
 /**
- * A class used to parse command line arguments into setup objects
+ * A class used to parse configs from several sources into a setup object
  * 
  * @author Luke Stevens
  */
@@ -38,6 +40,7 @@ public class SetupProvider<T> {
 	
 	final ArgumentParserProvider parserProvider;
 	final ReflectionUtils reflection;
+	final List<Field> fields;
 	final Class<T> c;
 
 	/**
@@ -45,9 +48,11 @@ public class SetupProvider<T> {
 	 * @param parserProvider The ArgumentParserProvider used to get the
 	 * required parser for each class.
 	 */
-	public SetupProvider(ArgumentParserProvider parserProvider, ReflectionUtils reflection, Class<T> c) {
+	@Inject
+	public SetupProvider(ArgumentParserProvider parserProvider, ReflectionUtils reflection, @SetupClass Class<T> c) {
 		this.parserProvider = parserProvider;
 		this.reflection = reflection;
+		this.fields = reflection.getAllFieldsWithAnnotation(c, ConfigOption.class);
 		this.c = c;
 	}
 
@@ -70,55 +75,53 @@ public class SetupProvider<T> {
 	 * @throws IOException 
 	 */
 	public T parseCommandLine(String[] args) throws ParseException, IOException {
-		
-		// Get all fields annotated with CommandLineOption for this class (and superclasses)
-		List<Field> fields = reflection.getAllFieldsWithAnnotation(c, CommandLineOption.class);
-		
-		// Create options object and add all fields to it
-		Options options = new Options();
-		for(Field field : fields) {
-			this.addFieldToOptions(options, field);
-		}
-		
-		// If usage has been specified, add the help command
-		CommandLineUsage usage = c.getAnnotation(CommandLineUsage.class);
-		if(usage != null) {
-			options.addOption(usage.helpShortOpt(), "help", false, "Print script usage information");
-		}
-		
-		// Add config option
-		options.addOption(CONFIG_OPTION, "config", true, "A local config file used to override environment variable setup");
+		Options options = createCommandLineOptions();
 		
 		// Parse commandline args
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = parser.parse(options, args);
 		
-		// If usage is specified, and help command provided, then print help and exit
-		if(usage != null && cmd.hasOption(usage.helpShortOpt())) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(usage.value(), options);
-			return null; // Don't continue with application if help specified
-		}
-		
 		// Set up parsers
-		List<FieldParser> parsers = new ArrayList<>();
-		parsers.add(new EnvironmentVariableFieldParser());
-		parsers.add(new CommandLineFieldParser(cmd));
+		List<ConfigValueProvider> configProviders = setupConfigProviders(cmd);
+		
+		// Create and populate result instance
+		T setup = createSetupFromFields(configProviders);
+		try {
+			checkSetupComplete(setup);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		return setup;
+	}
+	
+	/*
+	 * Create the set of config providers to be used when creating this setup, in descending order of priority
+	 */
+	List<ConfigValueProvider> setupConfigProviders(CommandLine cmd) throws IOException {
+		List<ConfigValueProvider> configProviders = new ArrayList<>();
+		configProviders.add(new EnvironmentVariableConfigProvider());
+		configProviders.add(new CommandLineConfigProvider(cmd));
 		if(cmd.hasOption(CONFIG_OPTION)) {
 			File configFile = new File(cmd.getOptionValue(CONFIG_OPTION));
 			Config fileConfig = new FileConfig(configFile);
 			Config mavenConfig = new MavenConfig();
 			Config compoundConfig = new CompoundConfig(mavenConfig, fileConfig);
 			compoundConfig.load();
-			parsers.add(new ConfigFieldParser(compoundConfig));
+			configProviders.add(new PropertiesConfigProvider(compoundConfig));
 		}
-		
-		// Create and populate result instance
+		return configProviders;
+	}
+	
+	/*
+	 * Create a setup object from the class fields, and the set of config providers used
+	 * to fetch the class values
+	 */
+	T createSetupFromFields(List<ConfigValueProvider> configProviders) throws IllegalArgumentException, ParseException {
 		T result;
 		try {
 			result = c.newInstance();
-			for(FieldParser fieldParser : parsers) {
-				parseValues(result, fields, fieldParser);
+			for(ConfigValueProvider configProvider : configProviders) {
+				setupConfigValuesFromProvider(result, configProvider);
 			}
 		} catch(InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
@@ -127,9 +130,13 @@ public class SetupProvider<T> {
 		return result;
 	}
 	
-	void parseValues(T setup, List<Field> fields, FieldParser parser) throws IllegalArgumentException, IllegalAccessException, ParseException {
+	/*
+	 * Given a setup object and a list of all class fields, this uses a specific configProvider to fetch
+	 * the required config values
+	 */
+	void setupConfigValuesFromProvider(T setup, ConfigValueProvider configProvider) throws IllegalArgumentException, IllegalAccessException, ParseException {
 		for(Field field : fields) {
-			String value = parser.parse(field);
+			String value = configProvider.getConfigValue(field);
 			if(value != null) {
 				ArgumentParser<?> argParser = parserProvider.getParser(field.getType());
 				if(argParser == null) {
@@ -144,21 +151,46 @@ public class SetupProvider<T> {
 		}
 	}
 	
+	/*
+	 * Check that setup is complete, and all fields have been populated
+	 */
+	void checkSetupComplete(T setup) throws IllegalArgumentException, IllegalAccessException {
+		for(Field field : fields) {
+			field.setAccessible(true);
+			Object value = field.get(setup);
+			if(value == null) {
+				throw new ConfigException(c.getSimpleName() + "." + field.getName());
+			}
+		}
+	}
 	
+	Options createCommandLineOptions() {
+		// Create options object and add all fields to it
+		Options options = new Options();
+		for(Field field : fields) {
+			this.addFieldToOptions(options, field);
+		}
+		
+		// Add config option
+		options.addOption(Option
+				.builder(CONFIG_OPTION)
+				.hasArg()
+				.longOpt("config")
+				.build());
+		// options.addOption(CONFIG_OPTION, true, "config");
+		return options;
+	}
 	
-	
-
 	
 	/*
 	 * Use the annotations and typing for this field to add a 
 	 * new option value to the options object
 	 */
 	void addFieldToOptions(Options options, Field field) {
-		CommandLineOption cli = field.getAnnotation(CommandLineOption.class);
+		ConfigOption cli = field.getAnnotation(ConfigOption.class);
 		Builder builder = Option
 				.builder(cli.opt())
-				.hasArg(!(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)))
-				.desc(cli.description());
+				.hasArg(!(field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)));
 		if(hasLongOpt(cli)) {
 			builder.longOpt(cli.longOpt());
 		}
@@ -168,8 +200,8 @@ public class SetupProvider<T> {
 	/*
 	 * Checks whether this option has a long option value specified
 	 */
-	boolean hasLongOpt(CommandLineOption cli) {
-		return !cli.longOpt().equals(CommandLineOption.LONG_OPT_DEFAULT);
+	boolean hasLongOpt(ConfigOption cli) {
+		return !cli.longOpt().equals(ConfigOption.LONG_OPT_DEFAULT);
 	}
 
 }
