@@ -11,14 +11,14 @@ import java.util.Map;
  * 
  * @author Luke Stevens
  */
-public final class ArgumentParserProvider {
+public final class PropertyParserProvider {
 	
 	/**
 	 * @return The default provider, with preset parsers for
 	 * all primitives, String, Object and File classes.
 	 */
-	public static ArgumentParserProvider getDefault() {
-		ArgumentParserProvider provider = new ArgumentParserProvider();
+	public static PropertyParserProvider getDefault() {
+		PropertyParserProvider provider = new PropertyParserProvider();
 		provider.setParser(int.class, Integer::parseInt);
 		provider.setParser(Integer.class, Integer::parseInt);
 		
@@ -49,7 +49,7 @@ public final class ArgumentParserProvider {
 
 	// Although not type checked, the helper methods ensure that the
 	// key types are the same as the value types
-	private final Map<Class<?>, ArgumentParser<?>> parsers = new HashMap<>();
+	private final Map<Class<?>, PropertyParser<?>> parsers = new HashMap<>();
 	
 	/**
 	 * Sets a class and parser pair for this provider
@@ -57,7 +57,7 @@ public final class ArgumentParserProvider {
 	 * @param c The class representing the parsed type
 	 * @param parser The parser to parse a String into the given type
 	 */
-	public <T> void setParser(Class<T> c, ArgumentParser<T> parser) {
+	public <T> void setParser(Class<T> c, PropertyParser<T> parser) {
 		this.parsers.put(c, parser);
 	}
 	
@@ -68,8 +68,8 @@ public final class ArgumentParserProvider {
 	 * @return A parser to parse a String into the given type
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ArgumentParser<T> getParser(Class<T> c){
-		return (ArgumentParser<T>) this.parsers.get(c);
+	public <T> PropertyParser<T> getParser(Class<T> c){
+		return (PropertyParser<T>) this.parsers.get(c);
 	}
 
 }

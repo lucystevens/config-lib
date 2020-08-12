@@ -22,35 +22,23 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 public @interface ConfigOption {
 	
-	/**
-	 * The default value for longOpt(), should be replaced with null when found
-	 */
-	public static final String LONG_OPT_DEFAULT = "V2Or8Jtyd7rHkmZ17LIc";
 	
 	/**
-	 * The default value for configName, should be replaced with <application-name>.<variable-name>
+	 * The default value for configName, should be replaced with <variable-name>
 	 */
-	public static final String CONFIG_NAME_DEFAULT = "31UhiG1ZQd3TRk0Qcn4C";
+	public static final String CONFIG_NAME_DEFAULT = "CONFIG_NAME_DEFAULT";
 	
-	/**
-	 * @return The short, single character code for this option
-	 */
-	public String opt();
+	public static final String DEFAULT_VALUE_DEFAULT = "DEFAULT_VALUE_DEFAULT";
 	
-	/**
-	 * @return The long key code for this option
-	 */
-	public String longOpt() default LONG_OPT_DEFAULT;
-	
-	/**
-	 * @return The environment variable containing this config
-	 */
-	public String envVar();
 	
 	/**
 	 * @return The config key for this config, if overridden in a local config file.
-	 * This defaults to <application-name>.<variable-name>.
+	 * This defaults to <variable-name>.
 	 */
-	public String configName() default CONFIG_NAME_DEFAULT;
+	public String name() default CONFIG_NAME_DEFAULT;
+	
+	public String defaultValue() default DEFAULT_VALUE_DEFAULT;
+	
+	public boolean optional() default false;
 	
 }

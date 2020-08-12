@@ -1,4 +1,6 @@
-package uk.co.lukestevens.config;
+package uk.co.lukestevens.config.exceptions;
+
+import uk.co.lukestevens.config.Config;
 
 /**
  * 

@@ -9,7 +9,7 @@ package uk.co.lukestevens.config.parsers;
  * @param <T> The type this parses a String into
  */
 @FunctionalInterface
-public interface ArgumentParser<T> {
+public interface PropertyParser<T> {
 
 	/**
 	 * Parse a String into a given type

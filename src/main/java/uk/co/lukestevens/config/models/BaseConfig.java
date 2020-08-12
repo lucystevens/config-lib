@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.lukestevens.config.Config;
-import uk.co.lukestevens.config.ConfigException;
 import uk.co.lukestevens.config.KeyParser;
+import uk.co.lukestevens.config.exceptions.ConfigException;
 
 /**
  * A base implementation of the Config interface that defines 
