@@ -3,11 +3,10 @@ package uk.co.lukestevens.config.parsers;
 import java.lang.reflect.Field;
 import javax.inject.Inject;
 
-import org.apache.commons.cli.ParseException;
-
 import uk.co.lukestevens.config.Config;
 import uk.co.lukestevens.config.annotations.ConfigOption;
 import uk.co.lukestevens.config.annotations.SetupClass;
+import uk.co.lukestevens.config.exceptions.ParseException;
 import uk.co.lukestevens.utils.ReflectionUtils;
 
 public class ReflectiveConfigParser<T> implements ConfigParser<T> {
@@ -31,17 +30,13 @@ public class ReflectiveConfigParser<T> implements ConfigParser<T> {
 			
 			for(Field field : reflection.getAllFieldsWithAnnotation(c, ConfigOption.class)) {
 				String key = this.getConfigOptionName(field);
-				String value = config.getAsStringOrDefault(key, field.getAnnotation(ConfigOption.class).defaultValue());
-				if(!value.equals(ConfigOption.DEFAULT_VALUE_DEFAULT)) {
+				String value = config.getAsStringOrDefault(key, null);
+				if(value != null) {
 					PropertyParser<?> argParser = parserProvider.getParser(field.getType());
-					if(argParser == null) {
-						throw new ParseException("No parser found for class " + field.getType());
-					}
-					else {
-						Object fieldValue = argParser.parse(value);
-						field.setAccessible(true);
-						field.set(result, fieldValue);
-					}
+					
+					Object fieldValue = argParser.parse(value);
+					field.setAccessible(true);
+					field.set(result, fieldValue);
 				}
 			}
 			

@@ -1,8 +1,7 @@
 package uk.co.lukestevens.config.parsers;
 
-import org.apache.commons.cli.ParseException;
-
 import uk.co.lukestevens.config.Config;
+import uk.co.lukestevens.config.exceptions.ParseException;
 
 public interface ConfigParser<T> {
 	

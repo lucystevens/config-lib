@@ -28,16 +28,11 @@ public @interface ConfigOption {
 	 */
 	public static final String CONFIG_NAME_DEFAULT = "CONFIG_NAME_DEFAULT";
 	
-	public static final String DEFAULT_VALUE_DEFAULT = "DEFAULT_VALUE_DEFAULT";
-	
-	
 	/**
 	 * @return The config key for this config, if overridden in a local config file.
 	 * This defaults to <variable-name>.
 	 */
 	public String name() default CONFIG_NAME_DEFAULT;
-	
-	public String defaultValue() default DEFAULT_VALUE_DEFAULT;
 	
 	public boolean optional() default false;
 	

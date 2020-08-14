@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import uk.co.lukestevens.config.exceptions.ParseException;
+
 /**
  * A class to provide correct parsers for specific classes. This can either be instantiated
  * with no parsers for full customisability, or a default can be accessed using {@link getDefault()}
@@ -66,10 +68,16 @@ public final class PropertyParserProvider {
 	 * @param <T> The type to be returned when parsed
 	 * @param c The class representing the parsed type
 	 * @return A parser to parse a String into the given type
+	 * @throws ParseException 
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> PropertyParser<T> getParser(Class<T> c){
-		return (PropertyParser<T>) this.parsers.get(c);
+	public <T> PropertyParser<T> getParser(Class<T> c) throws ParseException{
+		PropertyParser<T> parser = (PropertyParser<T>) this.parsers.get(c);
+		if(parser == null) {
+			throw new ParseException(c);
+		} else {
+			return parser;
+		}
 	}
 
 }
