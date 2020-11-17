@@ -11,7 +11,7 @@ public class ReflectionUtils {
 	/*
 	 * Recursively gets all fields from this class and super classes
 	 */
-	public <T> List<Field> getAllFields(Class<T> c){
+	public static <T> List<Field> getAllFields(Class<T> c){
 		List<Field> fields = new ArrayList<>();
 		Class<?> currentClass = c;
 		while(currentClass != null && !currentClass.isPrimitive() && !currentClass.equals(Object.class)) {
@@ -23,8 +23,8 @@ public class ReflectionUtils {
 		return fields;
 	}
 	
-	public <T, A extends Annotation> List<Field> getAllFieldsWithAnnotation(Class<T> c, Class<A> annotationClass){
-		return this.getAllFields(c)
+	public static <T, A extends Annotation> List<Field> getAllFieldsWithAnnotation(Class<T> c, Class<A> annotationClass){
+		return getAllFields(c)
 				.stream()
 				.filter(f -> f.getDeclaredAnnotation(annotationClass) != null)
 				.collect(Collectors.toList());

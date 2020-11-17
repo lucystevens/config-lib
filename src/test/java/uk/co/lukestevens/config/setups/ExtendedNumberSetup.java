@@ -16,7 +16,7 @@ public class ExtendedNumberSetup extends LongOptSetup {
 	@ConfigOption
 	private Double testDouble;
 	
-	private String missingField;
+	private String missingField = "";
 
 	public float getTestfloat() {
 		return testfloat;

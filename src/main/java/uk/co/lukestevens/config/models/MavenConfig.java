@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import uk.co.lukestevens.config.ApplicationProperties;
+
 /**
  * A config source implementation for resolving the base config source from file
  * 
  * @author Luke Stevens
  */
-public class MavenConfig extends PropertiesConfig {
+public class MavenConfig extends PropertiesConfig implements ApplicationProperties {
 	
 	private static final String MAVEN_PROPERTIES = "/mvn.properties";
 	public static final String NAME = "application.name";
@@ -36,6 +38,21 @@ public class MavenConfig extends PropertiesConfig {
 		try(InputStream input = MavenConfig.class.getResourceAsStream(MAVEN_PROPERTIES)){
 			this.load(input);
 		}
+	}
+
+	@Override
+	public String getApplicationVersion() {
+		return this.getAsString(VERSION);
+	}
+
+	@Override
+	public String getApplicationName() {
+		return this.getAsString(NAME);
+	}
+
+	@Override
+	public String getApplicationGroup() {
+		return this.getAsString(GROUP);
 	}
 
 }
