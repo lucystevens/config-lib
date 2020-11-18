@@ -17,6 +17,11 @@ import uk.co.lukestevens.config.exceptions.ConfigException;
  */
 public abstract class BaseConfig implements Config {
 	
+	static final KeyParser<Integer> INT_PARSER = Integer::parseInt;
+	static final KeyParser<Double> DOUBLE_PARSER = Double::parseDouble;
+	static final KeyParser<Boolean> BOOLEAN_PARSER = s -> s.equalsIgnoreCase("true");
+	static final KeyParser<List<String>> LIST_PARSER = BaseConfig::parseList;
+	
 
 	/**
 	 * Get a property value given the key
@@ -71,48 +76,48 @@ public abstract class BaseConfig implements Config {
 	
 	@Override
 	public int getAsInt(String key) {
-		return this.getParsedValue(key, Integer::parseInt);
+		return this.getParsedValue(key, INT_PARSER);
 	}
 	
 	@Override
 	public int getAsIntOrDefault(String key, int def) {
-		return this.getParsedValueOrDefault(key, Integer::parseInt, def);
+		return this.getParsedValueOrDefault(key, INT_PARSER, def);
 	}
 	
 	@Override
 	public double getAsDouble(String key) {
-		return this.getParsedValue(key, Double::parseDouble);
+		return this.getParsedValue(key, DOUBLE_PARSER);
 	}
 	
 	@Override
 	public double getAsDoubleOrDefault(String key, double def) {
-		return this.getParsedValueOrDefault(key, Double::parseDouble, def);
+		return this.getParsedValueOrDefault(key, DOUBLE_PARSER, def);
 	}
 	
 	@Override
 	public boolean getAsBoolean(String key) {
-		return this.getParsedValue(key, val -> val.equalsIgnoreCase("true"));
+		return this.getParsedValue(key, BOOLEAN_PARSER);
 	}
 	
 	@Override
 	public boolean getAsBooleanOrDefault(String key, boolean def) {
-		return this.getParsedValueOrDefault(key, val -> val.equalsIgnoreCase("true"), def);
+		return this.getParsedValueOrDefault(key, BOOLEAN_PARSER, def);
 	}
 	
 	@Override
 	public List<String> getAsList(String key) {
-		return this.getParsedValue(key, this::parseList);
+		return this.getParsedValue(key, LIST_PARSER);
 	}
 	
 	@Override
 	public List<String> getAsListOrDefault(String key, List<String> def) {
-		return this.getParsedValueOrDefault(key, this::parseList, def);
+		return this.getParsedValueOrDefault(key, LIST_PARSER, def);
 	}
 	
 	/*
 	 * Helper method for parsing a list from a string
 	 */
-	List<String> parseList(String value){
+	static List<String> parseList(String value){
 		List<String> result = new ArrayList<>();
 		for(String part : value.split(",")) {
 			result.add(part.trim());
