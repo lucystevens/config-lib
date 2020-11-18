@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.inject.Singleton;
+
 import uk.co.lukestevens.config.ApplicationProperties;
 
 /**
@@ -11,6 +13,7 @@ import uk.co.lukestevens.config.ApplicationProperties;
  * 
  * @author Luke Stevens
  */
+@Singleton
 public class MavenConfig extends PropertiesConfig implements ApplicationProperties {
 	
 	private static final String MAVEN_PROPERTIES = "/mvn.properties";

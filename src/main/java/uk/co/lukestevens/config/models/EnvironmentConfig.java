@@ -3,8 +3,12 @@ package uk.co.lukestevens.config.models;
 import java.util.Map;
 import java.io.IOException;
 import java.util.Map.Entry;
+
+import javax.inject.Singleton;
+
 import java.util.Properties;
 
+@Singleton
 public class EnvironmentConfig extends PropertiesConfig {
 	
 	public EnvironmentConfig() {

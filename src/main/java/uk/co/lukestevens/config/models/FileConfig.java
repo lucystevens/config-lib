@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.inject.Singleton;
+
 /**
  * A config source implementation for resolving the base config source from file
  * 
  * @author Luke Stevens
  */
+@Singleton
 public class FileConfig extends PropertiesConfig {
 	
 	private final File file;
