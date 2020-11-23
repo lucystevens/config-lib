@@ -1,5 +1,11 @@
 package uk.co.lukestevens.config.exceptions;
 
+/**
+ * An exception to be thrown when there are errors parsing
+ * a class or value.
+ * 
+ * @author Luke Stevens
+ */
 public class ParseException extends Exception {
 
 	private static final long serialVersionUID = 5129224712320296284L;

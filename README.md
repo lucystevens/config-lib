@@ -1,2 +1,2 @@
 # config-lib
-A configuration library for fetching properties from file and database
+A configuration library for fetching properties from various sources

@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * A config source implementation for resolving the base config source from file
+ * A config implementation for resolving properties from a Properties object
  * 
  * @author Luke Stevens
  */
@@ -14,6 +14,11 @@ public class PropertiesConfig extends BaseConfig {
 	
 	protected final Properties props;
 
+	/**
+	 * Create a new PropertiesConfig
+	 * @param props The properties to back with config with.
+	 * External changes to this properties object will affect this config instance
+	 */
 	public PropertiesConfig(Properties props) {
 		this.props = props;
 	}

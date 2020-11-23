@@ -9,7 +9,7 @@ import java.util.Properties;
 import javax.inject.Singleton;
 
 /**
- * A config source implementation for resolving the base config source from file
+ * A config implementation for resolving the properties from file
  * 
  * @author Luke Stevens
  */
@@ -19,7 +19,7 @@ public class FileConfig extends PropertiesConfig {
 	private final File file;
 
 	/**
-	 * Creates a new config file source
+	 * Creates a new FileConfig
 	 * @param file The config file to load properties from
 	 */
 	public FileConfig(File file) {
@@ -28,7 +28,7 @@ public class FileConfig extends PropertiesConfig {
 	}
 	
 	/**
-	 * Loads additional config into this source from an inputstream
+	 * Loads additional config into this config from an inputstream
 	 * @param configFile The config stream to load properties from
 	 * @throws IOException
 	 */

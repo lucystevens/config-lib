@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 import uk.co.lukestevens.config.ApplicationProperties;
 
 /**
- * A config source implementation for resolving the base config source from file
+ * A config implementation for resolving properties from the local maven file
  * 
  * @author Luke Stevens
  */
@@ -26,7 +26,7 @@ public class MavenConfig extends PropertiesConfig implements ApplicationProperti
 	}
 	
 	/**
-	 * Loads additional config into this source from an inputstream
+	 * Loads additional config into this config from an inputstream
 	 * @param configFile The config stream to load properties from
 	 * @throws IOException
 	 */

@@ -8,8 +8,11 @@ import java.util.stream.Collectors;
 
 public class ReflectionUtils {
 
-	/*
-	 * Recursively gets all fields from this class and super classes
+	/**
+	 * Recursively get all fields from a class and it's superclasses
+	 * @param <T> The class type
+	 * @param c The class to get fields from
+	 * @return A list of all fields on the class and it's superclasses
 	 */
 	public static <T> List<Field> getAllFields(Class<T> c){
 		List<Field> fields = new ArrayList<>();
@@ -23,6 +26,14 @@ public class ReflectionUtils {
 		return fields;
 	}
 	
+	/**
+	 * Get all fields on a class (and it's superclasses) with a given annotation
+	 * @param <T> The class type
+	 * @param <A> The annotation type
+	 * @param c The class to get fields from
+	 * @param annotationClass The annotation to check against fields
+	 * @return A list of all fields on a class with a given annotation
+	 */
 	public static <T, A extends Annotation> List<Field> getAllFieldsWithAnnotation(Class<T> c, Class<A> annotationClass){
 		return getAllFields(c)
 				.stream()

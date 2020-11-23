@@ -8,9 +8,19 @@ import javax.inject.Singleton;
 
 import java.util.Properties;
 
+/**
+ * A config implementation that fetches properties from the system environment
+ * variables.
+ * 
+ * @author Luke Stevens
+ */
 @Singleton
 public class EnvironmentConfig extends PropertiesConfig {
 	
+	/**
+	 * Constructs a new EnvironmentConfig. Any changes to environment variables
+	 * will require a reload to view.
+	 */
 	public EnvironmentConfig() {
 		super(new Properties());
 	}
