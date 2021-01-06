@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import javax.inject.Singleton;
 
+import uk.co.lukestevens.utils.EnvironmentVariables;
+
 import java.util.Properties;
 
 /**
@@ -27,7 +29,7 @@ public class EnvironmentConfig extends PropertiesConfig {
 
 	@Override
 	public void load() throws IOException {
-		init(System.getenv());
+		init(EnvironmentVariables.get());
 	}
 	
 	void init(Map<String, String> environmentVariables) {
