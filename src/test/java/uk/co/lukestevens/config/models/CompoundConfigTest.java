@@ -24,6 +24,7 @@ public class CompoundConfigTest {
 	@Test
 	public void testLoad_singleConfig() throws IOException {
 		Config config1 = mock(Config.class);
+		when(config1.getAsStringOrDefault("key", null)).thenReturn("value");
 		Set<Entry<Object, Object>> entrySet = new HashSet<>();
 		entrySet.add(new AbstractMap.SimpleEntry<Object, Object>("key", "value"));
 		when(config1.entrySet()).thenReturn(entrySet);
@@ -39,17 +40,24 @@ public class CompoundConfigTest {
 	@Test
 	public void testLoad_multipleConfigs() throws IOException {
 		Config config1 = mock(Config.class);
+		when(config1.getAsStringOrDefault("key", null)).thenReturn("value");
+		
 		Set<Entry<Object, Object>> entrySet1 = new HashSet<>();
 		entrySet1.add(new AbstractMap.SimpleEntry<Object, Object>("key", "value"));
 		when(config1.entrySet()).thenReturn(entrySet1);
 		
 		Config config2 = mock(Config.class);
+		when(config2.getAsStringOrDefault("another", null)).thenReturn("property");
+		when(config2.getAsStringOrDefault("and", null)).thenReturn("one more");
+		
 		Set<Entry<Object, Object>> entrySet2 = new HashSet<>();
 		entrySet2.add(new AbstractMap.SimpleEntry<Object, Object>("another", "property"));
 		entrySet2.add(new AbstractMap.SimpleEntry<Object, Object>("and", "one more"));
 		when(config2.entrySet()).thenReturn(entrySet2);
 		
 		Config config3 = mock(Config.class);
+		when(config3.getAsStringOrDefault("key", null)).thenReturn("other value");
+		
 		Set<Entry<Object, Object>> entrySet3 = new HashSet<>();
 		entrySet3.add(new AbstractMap.SimpleEntry<Object, Object>("key", "other value"));
 		when(config3.entrySet()).thenReturn(entrySet3);
