@@ -1,4 +1,4 @@
-package uk.co.lukestevens.config.models;
+package uk.co.lukestevens.config.application;
 
 import javax.inject.Inject;
 

@@ -1,4 +1,4 @@
-package uk.co.lukestevens.testing.mocks;
+package uk.co.lukestevens.config.application;
 
 import uk.co.lukestevens.config.ApplicationProperties;
 

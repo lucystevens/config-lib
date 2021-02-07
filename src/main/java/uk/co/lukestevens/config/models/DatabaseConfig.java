@@ -21,8 +21,8 @@ import uk.co.lukestevens.config.services.PropertyService;
  */
 public class DatabaseConfig extends BaseConfig{
 	
-	private final Map<String, Property> config = new HashMap<>();
-	private final PropertyService service;
+	final Map<String, Property> cache = new HashMap<>();
+	final PropertyService service;
 	
 	/**
 	 * Creates a new configuration by loading properties from a database using a service
@@ -35,15 +35,16 @@ public class DatabaseConfig extends BaseConfig{
 
 	@Override
 	public Set<Entry<Object, Object>> entrySet() {
-		return this.config.values()
+		return this.cache.values()
 				.stream()
+				.filter(prop -> !prop.isExpired())
 				.map(prop -> new AbstractMap.SimpleEntry<Object, Object>(prop.getKey(), prop.getValue()))
 				.collect(Collectors.toSet());
 	}
 
 	@Override
 	public String get(String key) {
-		Property prop = this.config.get(key);
+		Property prop = this.cache.get(key);
 		if(prop == null || prop.isExpired()) {
 			prop = this.service.get(key);
 		}
@@ -52,7 +53,7 @@ public class DatabaseConfig extends BaseConfig{
 			return null;
 		}
 		else {
-			this.config.put(key, prop);
+			this.cache.put(key, prop);
 			return prop.getValue();
 		}
 	}
@@ -60,7 +61,7 @@ public class DatabaseConfig extends BaseConfig{
 	@Override
 	public void load() throws IOException {
 		for(Property prop : service.load()) {
-			this.config.put(prop.getKey(), prop);
+			this.cache.put(prop.getKey(), prop);
 		}
 	}
 

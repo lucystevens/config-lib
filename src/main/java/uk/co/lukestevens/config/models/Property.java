@@ -58,4 +58,13 @@ public class Property {
 		return expiry != null && expiry.before(Dates.now());
 	}
 
+	/**
+	 * @return The date after which this property will expire
+	 */
+	public Date getExpiry() {
+		return expiry;
+	}
+	
+	
+
 }
