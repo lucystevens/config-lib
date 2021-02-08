@@ -8,11 +8,16 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.AbstractMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import uk.co.lukestevens.config.Config;
 
 public class CompoundConfigTest {
+	
+	Map.Entry<Object, Object> createEntry(Object key, Object value){
+		return new AbstractMap.SimpleEntry<>(key, value);
+	}
 	
 	@Test
 	public void testLoad_noConfigs() throws IOException {
@@ -26,7 +31,7 @@ public class CompoundConfigTest {
 		Config config1 = mock(Config.class);
 		when(config1.getAsStringOrDefault("key", null)).thenReturn("value");
 		Set<Entry<Object, Object>> entrySet = new HashSet<>();
-		entrySet.add(new AbstractMap.SimpleEntry<Object, Object>("key", "value"));
+		entrySet.add(createEntry("key", "value"));
 		when(config1.entrySet()).thenReturn(entrySet);
 		
 		CompoundConfig compoundConfig = new CompoundConfig(config1);
@@ -43,7 +48,7 @@ public class CompoundConfigTest {
 		when(config1.getAsStringOrDefault("key", null)).thenReturn("value");
 		
 		Set<Entry<Object, Object>> entrySet1 = new HashSet<>();
-		entrySet1.add(new AbstractMap.SimpleEntry<Object, Object>("key", "value"));
+		entrySet1.add(createEntry("key", "value"));
 		when(config1.entrySet()).thenReturn(entrySet1);
 		
 		Config config2 = mock(Config.class);
@@ -51,15 +56,15 @@ public class CompoundConfigTest {
 		when(config2.getAsStringOrDefault("and", null)).thenReturn("one more");
 		
 		Set<Entry<Object, Object>> entrySet2 = new HashSet<>();
-		entrySet2.add(new AbstractMap.SimpleEntry<Object, Object>("another", "property"));
-		entrySet2.add(new AbstractMap.SimpleEntry<Object, Object>("and", "one more"));
+		entrySet2.add(createEntry("another", "property"));
+		entrySet2.add(createEntry("and", "one more"));
 		when(config2.entrySet()).thenReturn(entrySet2);
 		
 		Config config3 = mock(Config.class);
 		when(config3.getAsStringOrDefault("key", null)).thenReturn("other value");
 		
 		Set<Entry<Object, Object>> entrySet3 = new HashSet<>();
-		entrySet3.add(new AbstractMap.SimpleEntry<Object, Object>("key", "other value"));
+		entrySet3.add(createEntry("key", "other value"));
 		when(config3.entrySet()).thenReturn(entrySet3);
 		
 		CompoundConfig compoundConfig = new CompoundConfig(config1, config2, config3);

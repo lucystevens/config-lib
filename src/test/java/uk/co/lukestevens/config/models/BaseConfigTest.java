@@ -11,16 +11,16 @@ import uk.co.lukestevens.config.exceptions.ConfigException;
 
 public class BaseConfigTest {
 	
+	BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
+	
 	@Test
 	public void testGetAsString_valueExists() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		assertEquals("value", config.getAsString("key"));
 	}
 	
 	@Test
 	public void testGetAsString_valueMissing() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		ConfigException e = assertThrows(ConfigException.class, () -> {
 			config.getAsString("nokey");
@@ -30,28 +30,24 @@ public class BaseConfigTest {
 	
 	@Test
 	public void testGetAsStringOrDefault_valueExists() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		assertEquals("value", config.getAsStringOrDefault("key", "default"));
 	}
 	
 	@Test
 	public void testGetAsStringOrDefault_valueMissing() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn(null);
 		assertEquals("default", config.getAsStringOrDefault("key", "default"));
 	}
 	
 	@Test
 	public void testGetParsedValue_valueParsesCorrectly() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		assertEquals("value+", config.getParsedValue("key", s -> s+"+"));
 	}
 	
 	@Test
 	public void testGetParsedValue_valueParsingThrowsException() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		ConfigException e = assertThrows(ConfigException.class, () -> {
 			config.getParsedValue("key", s -> { throw new Exception("e"); });
@@ -61,14 +57,12 @@ public class BaseConfigTest {
 	
 	@Test
 	public void testGetParsedValueOrDefault_valueMissing() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn(null);
 		assertEquals("default", config.getParsedValueOrDefault("key", s -> s+"+", "default"));
 	}
 	
 	@Test
 	public void testGetParsedValueOrDefault_valueParsingThrowsException() {
-		BaseConfig config = mock(BaseConfig.class, CALLS_REAL_METHODS);
 		when(config.get("key")).thenReturn("value");
 		ConfigException e = assertThrows(ConfigException.class, () -> {
 			config.getParsedValueOrDefault("key", s -> { throw new Exception("e"); }, "default");

@@ -2,6 +2,7 @@ package uk.co.lukestevens.config.models;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -35,6 +36,9 @@ public class FileConfig extends PropertiesConfig {
 	public void load(InputStream input) throws IOException {
 		if(input != null) {
 			this.props.load(input);
+		}
+		else {
+			throw new FileNotFoundException(file.getName());
 		}
 	}
 

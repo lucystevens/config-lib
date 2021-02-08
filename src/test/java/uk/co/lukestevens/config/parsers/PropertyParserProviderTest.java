@@ -17,6 +17,15 @@ public class PropertyParserProviderTest {
 	
 	PropertyParserProvider provider = PropertyParserProvider.getDefault();
 	
+	@Test
+	public void testParserMissingForClass() {
+		ParseException e = assertThrows(ParseException.class, () -> 
+			provider.getParser(PropertyParserProviderTest.class));
+		
+		assertEquals("No parser found for class uk.co.lukestevens.config.parsers.PropertyParserProviderTest.", e.getMessage());
+		
+	}
+	
 	// ------------ ints ------------
 	
 	@Test
