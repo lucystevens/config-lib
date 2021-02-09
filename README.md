@@ -13,7 +13,7 @@ Install the latest version of config-lib using Maven:
 <dependency>
 	<groupId>uk.co.lukestevens</groupId>
 	<artifactId>config-lib</artifactId>
-	<version>2.0.0</version>
+	<version>{{ inputs.version }}</version>
 </dependency>
 ```
 
