@@ -6,9 +6,12 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-import uk.co.lukestevens.config.Property;
-import uk.co.lukestevens.jdbc.Database;
-import uk.co.lukestevens.jdbc.result.DatabaseResult;
+import javax.inject.Inject;
+
+import uk.co.lukestevens.config.ApplicationProperties;
+import uk.co.lukestevens.config.models.Property;
+import uk.co.lukestevens.db.Database;
+import uk.co.lukestevens.db.DatabaseResult;
 import uk.co.lukestevens.utils.Dates;
 
 /**
@@ -18,44 +21,28 @@ import uk.co.lukestevens.utils.Dates;
  */
 public class DatabasePropertyService implements PropertyService {
 	
-	/**
-	 * Gets a database property service for application configs
-	 * @param db The database to use to fetch configs
-	 * @param applicationName The application name
-	 * @return A database property service for application configs
-	 */
-	public static DatabasePropertyService forApplication(Database db, String applicationName) {
-		return new DatabasePropertyService("application_config", "application", applicationName, db);
-	}
+	static final String LOAD_PROPERTIES_SQL = 
+			"SELECT key, value, refresh_rate FROM core.config "
+			+ "WHERE application_name IN('*', ?) "
+			+ "ORDER BY application_name!='*';";
 	
-	/**
-	 * Gets a database property service for site configs
-	 * @param db The database to use to fetch configs
-	 * @param siteName The site name
-	 * @return A database property service for site configs
-	 */
-	public static DatabasePropertyService forSite(Database db, String siteName) {
-		return new DatabasePropertyService("site_config", "site", siteName, db);
-	}
+	static final String GET_PROPERTY_SQL = 
+			"SELECT key, value, refresh_rate FROM core.config "
+			+ "WHERE application_name IN('*', ?) AND key=? "
+			+ "ORDER BY application_name!='*';"; 
 	
-	
-	final String tableName;
-	final String columnName;
-	final String name;
 	final Database db;
+	final ApplicationProperties applicationProperties;
 
-	DatabasePropertyService(String tableName, String columnName, String name, Database db) {
-		this.tableName = tableName;
-		this.columnName = columnName;
-		this.name = name;
+	@Inject
+	public DatabasePropertyService(Database db, ApplicationProperties applicationProperties) {
 		this.db = db;
+		this.applicationProperties = applicationProperties;
 	}
 
 	@Override
 	public List<Property> load() throws IOException{
-		String baseSql = "SELECT key, value, refresh_rate FROM core.%s WHERE %s IN('*', ?) ORDER BY %s!=?;";
-		String sql = String.format(baseSql, tableName, columnName, columnName);	
-		try(DatabaseResult dbr = db.query(sql, name, "*")){
+		try(DatabaseResult dbr = db.query(LOAD_PROPERTIES_SQL, this.applicationProperties.getApplicationName())){
 			return dbr.parseResultSet(this::parse);
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -64,9 +51,7 @@ public class DatabasePropertyService implements PropertyService {
 
 	@Override
 	public Property get(String key) {
-		String baseSql = "SELECT key, value, refresh_rate FROM core.%s WHERE %s IN('*', ?) AND key=? ORDER BY %s=?;";
-		String sql = String.format(baseSql, tableName, columnName, columnName);	
-		try(DatabaseResult dbr = db.query(sql, name, key, "*")){
+		try(DatabaseResult dbr = db.query(GET_PROPERTY_SQL, this.applicationProperties.getApplicationName(), key)){
 			List<Property> props = dbr.parseResultSet(this::parse);
 			return props.isEmpty()? null: props.get(0);
 		} catch (IOException | SQLException e) {

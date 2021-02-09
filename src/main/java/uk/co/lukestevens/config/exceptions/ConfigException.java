@@ -1,4 +1,6 @@
-package uk.co.lukestevens.config;
+package uk.co.lukestevens.config.exceptions;
+
+import uk.co.lukestevens.config.Config;
 
 /**
  * 
@@ -13,7 +15,7 @@ public class ConfigException extends RuntimeException {
 	private static final long serialVersionUID = -1449823977473131486L;
 	
 	/**
-	 * Constructs a new AppConfigException for errors
+	 * Constructs a new ConfigException for errors
 	 * where the key is missing a required value.
 	 * @param missingConfig The key that is missing a value
 	 */
@@ -22,7 +24,7 @@ public class ConfigException extends RuntimeException {
 	}
 	
 	/**
-	 * Constructs an AppConfigException for errors where
+	 * Constructs an ConfigException for errors where
 	 * the value exists for a key, but some other root exception
 	 * prevented it from being parsed correctly.
 	 * @param brokenConfig The key for which the value could not be parsed

@@ -1,166 +1,94 @@
 package uk.co.lukestevens.config.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import uk.co.lukestevens.config.Property;
-import uk.co.lukestevens.mocks.DateMocker;
-import uk.co.lukestevens.test.db.TestDatabase;
+import uk.co.lukestevens.config.ApplicationProperties;
+import uk.co.lukestevens.config.models.Property;
+import uk.co.lukestevens.config.services.DatabasePropertyService;
+import uk.co.lukestevens.db.Database;
+import uk.co.lukestevens.db.DatabaseResult;
+import uk.co.lukestevens.testing.mocks.DateMocker;
 
 public class DatabasePropertyServiceTest {
 	
-	TestDatabase db;
+	static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	@BeforeEach
-	public void setup() throws IOException, SQLException {
-		this.db = new TestDatabase();
-		this.db.executeFile("setup");
-		this.db.executeFile("addSiteConfigs");
-	}
+	ApplicationProperties applicationProperties = mock(ApplicationProperties.class);
+	Database database = mock(Database.class);
 	
-
+	DatabasePropertyService service = 
+		spy(new DatabasePropertyService(database, applicationProperties));
+	
 	@Test
-	public void testLoad() throws IOException {
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
+	public void testLoad() throws IOException, SQLException {
+		when(applicationProperties.getApplicationName()).thenReturn("test");
 		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
+		DatabaseResult dbr = mock(DatabaseResult.class);
+		when(database.query(DatabasePropertyService.LOAD_PROPERTIES_SQL, "test"))
+			.thenReturn(dbr);
+		
+		when(dbr.parseResultSet(service::parse)).thenReturn(new ArrayList<>());
+		
 		List<Property> props = service.load();
-		
-		// Before we sort, check that first property is global one
-		{
-			Property prop = props.get(0);
-			assertEquals("global.test.key", prop.getKey());
-			assertEquals("globalkey", prop.getValue());
-		}
-		
-		props.sort(Comparator.comparing(Property::getKey));
-		
-		assertEquals(4, props.size());
-		
-		Date futureDate = new Date(currentDate.getTime() + 25);
-		DateMocker.setCurrentDate(futureDate);
-		
-		{
-			Property prop = props.get(0);
-			assertEquals("boolean.test.key", prop.getKey());
-			assertEquals("true", prop.getValue());
-			assertTrue(prop.isExpired());
-		}
-		{
-			Property prop = props.get(1);
-			assertEquals("global.test.key", prop.getKey());
-			assertEquals("globalkey", prop.getValue());
-			assertFalse(prop.isExpired());
-		}
-		{
-			Property prop = props.get(2);
-			assertEquals("int.test.key", prop.getKey());
-			assertEquals("33", prop.getValue());
-			assertTrue(prop.isExpired());
-		}
-		{
-			Property prop = props.get(3);
-			assertEquals("string.test.key", prop.getKey());
-			assertEquals("iamakey", prop.getValue());
-			assertFalse(prop.isExpired());
-		}
+		assertTrue(props.isEmpty());
 	}
 	
 	@Test
-	public void testLoadNoProperties() throws IOException, SQLException {
-		this.db.executeFile("setup");
+	public void testGetWhenNoPropertiesFound() throws SQLException, IOException {
+		when(applicationProperties.getApplicationName()).thenReturn("test");
 		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "missing");
-		List<Property> props = service.load();
-		assertEquals(0, props.size());
-	}
-	
-	@Test
-	public void testGetProperty() {
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
+		DatabaseResult dbr = mock(DatabaseResult.class);
+		when(database.query(DatabasePropertyService.GET_PROPERTY_SQL, "test", "test.config"))
+			.thenReturn(dbr);
 		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
-		Property prop = service.get("string.test.key");
+		when(dbr.parseResultSet(any())).thenReturn(new ArrayList<>());
 		
-		Date futureDate = new Date(currentDate.getTime() + 31);
-		DateMocker.setCurrentDate(futureDate);
-		
-		assertEquals("string.test.key", prop.getKey());
-		assertEquals("iamakey", prop.getValue());
-		assertTrue(prop.isExpired());
-	}
-	
-	@Test
-	public void testGetOverridenProperty1() throws SQLException {
-		this.db.update("INSERT INTO core.site_config VALUES(default, ?, ?, ?, ?);", "global.test.key", "overiddenkey", "test", 12);
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
-		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
-		Property prop = service.get("global.test.key");
-		
-		Date futureDate = new Date(currentDate.getTime() + 31);
-		DateMocker.setCurrentDate(futureDate);
-		
-		assertEquals("global.test.key", prop.getKey());
-		assertEquals("overiddenkey", prop.getValue());
-		assertTrue(prop.isExpired());
-	}
-	@Test
-	public void testGetOverridenProperty2() throws SQLException {
-		this.db.update("INSERT INTO core.site_config VALUES(default, ?, ?, ?, ?);", "string.test.key", "globalkey", "*", 100);
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
-		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
-		Property prop = service.get("string.test.key");
-		
-		Date futureDate = new Date(currentDate.getTime() + 31);
-		DateMocker.setCurrentDate(futureDate);
-		
-		assertEquals("string.test.key", prop.getKey());
-		assertEquals("iamakey", prop.getValue());
-		assertTrue(prop.isExpired());
-	}
-	
-	@Test
-	public void testGetGlobalProperty() {
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
-		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
-		Property prop = service.get("global.test.key");
-		
-		Date futureDate = new Date(currentDate.getTime() + 31);
-		DateMocker.setCurrentDate(futureDate);
-		
-		assertEquals("global.test.key", prop.getKey());
-		assertEquals("globalkey", prop.getValue());
-		assertFalse(prop.isExpired());
-	}
-	
-	@Test
-	public void testGetMissingProperty() {
-		Date currentDate = new Date();
-		DateMocker.setCurrentDate(currentDate);
-		
-		DatabasePropertyService service = DatabasePropertyService.forSite(db, "test");
-		Property prop = service.get("not.test.key");
-		
+		Property prop = service.get("test.config");
 		assertNull(prop);
 	}
-
+	
+	@Test
+	public void testGetWhenPropertyFound() throws SQLException, IOException {
+		when(applicationProperties.getApplicationName()).thenReturn("test");
+		
+		DatabaseResult dbr = mock(DatabaseResult.class);
+		when(database.query(DatabasePropertyService.GET_PROPERTY_SQL, "test", "test.config"))
+			.thenReturn(dbr);
+		
+		Property expected = new Property("test.config", "some-value");
+		when(dbr.parseResultSet(any())).thenReturn(Arrays.asList(expected));
+		
+		Property actual = service.get("test.config");
+		assertEquals("test.config", actual.getKey());
+		assertEquals("some-value", actual.getValue());
+	}
+	
+	@Test
+	public void testParse() throws SQLException, IOException, ParseException {
+		ResultSet rs = mock(ResultSet.class);
+		when(rs.getString("key")).thenReturn("test.config");
+		when(rs.getString("value")).thenReturn("some-value");
+		when(rs.getLong("refresh_rate")).thenReturn(1000L*73L);// 73 seconds
+		
+		DateMocker.setCurrentDate(df.parse("2021-02-07 21:59:34"));
+		Property actual = service.parse(rs);
+		assertEquals("test.config", actual.getKey());
+		assertEquals("some-value", actual.getValue());
+		assertEquals(df.parse("2021-02-07 22:00:47"), actual.getExpiry());
+	}
+	
 }

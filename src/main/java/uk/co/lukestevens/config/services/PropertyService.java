@@ -3,7 +3,7 @@ package uk.co.lukestevens.config.services;
 import java.io.IOException;
 import java.util.List;
 
-import uk.co.lukestevens.config.Property;
+import uk.co.lukestevens.config.models.Property;
 
 /**
  * An interface defining a service that provides Properties from an external

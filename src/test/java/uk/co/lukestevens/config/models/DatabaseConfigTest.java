@@ -1,144 +1,95 @@
 package uk.co.lukestevens.config.models;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import uk.co.lukestevens.config.services.DatabasePropertyService;
 import uk.co.lukestevens.config.services.PropertyService;
-import uk.co.lukestevens.encryption.EncryptionService;
-import uk.co.lukestevens.mocks.DateMocker;
-import uk.co.lukestevens.mocks.MockEncryptionService;
-import uk.co.lukestevens.test.db.TestDatabase;
-import uk.co.lukestevens.utils.Dates;
+import uk.co.lukestevens.testing.mocks.DateMocker;
 
 public class DatabaseConfigTest {
 	
-	DatabaseConfig config;
+	static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	
-	@BeforeEach
-	public void setup() throws IOException, SQLException {
-		TestDatabase db = new TestDatabase();
-		db.executeFile("setup");
-		db.executeFile("addAppConfigs");
-	    
-	    DateMocker.setCurrentDate(new Date());
-	    EncryptionService encryption = new MockEncryptionService();
-	    PropertyService service = DatabasePropertyService.forApplication(db, "test");
-		this.config = new DatabaseConfig(service, encryption);
+	PropertyService propService = mock(PropertyService.class);
+	
+	DatabaseConfig config = spy(new DatabaseConfig(propService));
+	
+	void addProperty(Property prop) {
+		config.cache.put(prop.getKey(), prop);
 	}
 	
 	@Test
-	public void testGetExistingProperty() throws IOException {
-		config.load();
+	public void testEntryset() throws ParseException {
+		DateMocker.setCurrentDate(df.parse("2021-02-07"));
+		addProperty(new Property("no-expiry-key", "value1"));
+		addProperty(new Property("expired-key", "value2", df.parse("2021-01-01")));
+		addProperty(new Property("valid-key", "value3", df.parse("2021-02-08")));
 		
-		String string = config.getAsString("string.property");
-		assertEquals("some string", string);
-		
-		boolean bool = config.getAsBoolean("boolean.property");
-		assertTrue(bool);
-		
-		double doubl = config.getAsDouble("double.property");
-		assertEquals(12.5, doubl);
-		
-		int integer = config.getAsInt("int.property");
-		assertEquals(3, integer);
+		Set<Entry<Object, Object>> entryset = config.entrySet();
+		assertEquals(2, entryset.size());
+		assertTrue(entryset.contains(
+				new AbstractMap.SimpleEntry<>("no-expiry-key", "value1")));
+		assertTrue(entryset.contains(
+				new AbstractMap.SimpleEntry<>("valid-key", "value3")));
 	}
 	
 	@Test
-	public void testGetEncryptedProperty() throws IOException {
-		config.load();
+	public void testGetWhenPropertyNotInCache() throws ParseException {
+		when(propService.get("key1")).thenReturn(new Property("key1", "value1"));
+		String value = config.get("key1");
 		
-		String string = config.getEncrypted("encrypted.property");
-		assertEquals("secretkey", string);
+		assertEquals("value1", value);
+		assertTrue(config.cache.containsKey("key1"));
 	}
 	
 	@Test
-	public void testGetMissingProperty() throws IOException {
-		config.load();
+	public void testGetWhenPropertyInCacheExpired() throws ParseException {
+		DateMocker.setCurrentDate(df.parse("2021-02-07"));
+		addProperty(new Property("expired-key", "value2", df.parse("2021-01-01")));
 		
-		Object value = config.get("missing.property");
+		when(propService.get("expired-key")).thenReturn(new Property("expired-key", "value3"));
+		String value = config.get("expired-key");
+		
+		assertEquals("value3", value);
+		assertEquals("value3", config.cache.get("expired-key").getValue());
+	}
+	
+	@Test
+	public void testGetWhenPropertyNotInCacheOrService() {
+		String value = config.get("missing-key");
 		assertNull(value);
 	}
-
+	
 	@Test
-	public void testEntrySet() throws IOException {
-		config.load();
-		
-		List<Entry<Object, Object>> entries = new ArrayList<>(config.entrySet());
-		Collections.sort(entries, (e1, e2) -> e1.getKey().toString().compareTo(e2.getKey().toString()));
-		assertEquals(5, entries.size());
-		
-		{
-			Entry<Object, Object> entry = entries.get(0);
-			assertEquals("boolean.property", entry.getKey());
-			assertEquals("true", entry.getValue());
-		}
-		
-		{
-			Entry<Object, Object> entry = entries.get(1);
-			assertEquals("double.property", entry.getKey());
-			assertEquals("12.5", entry.getValue());
-		}
-		
-		{
-			Entry<Object, Object> entry = entries.get(2);
-			assertEquals("encrypted.property", entry.getKey());
-			assertEquals("secretkey (encrypted)", entry.getValue());
-		}
-		
-		{
-			Entry<Object, Object> entry = entries.get(3);
-			assertEquals("int.property", entry.getKey());
-			assertEquals("3", entry.getValue());
-		}
-		
-		{
-			Entry<Object, Object> entry = entries.get(4);
-			assertEquals("string.property", entry.getKey());
-			assertEquals("some string", entry.getValue());
-		}
+	public void testGetWhenPropertyIsInCache() {
+		addProperty(new Property("no-expiry-key", "value1"));
+		String value = config.get("no-expiry-key");
+		assertEquals("value1", value);
 	}
 	
 	@Test
-	public void testLoadExpiredProperty() throws IOException, SQLException {
+	public void testLoad() throws IOException {
+		when(propService.load()).thenReturn(Arrays.asList(
+				new Property("key1", "value1"),
+				new Property("key2", "value2"),
+				new Property("key3", "value3")
+			));
+		
 		config.load();
-		
-		{
-			Object string = config.get("string.property");
-			assertEquals("some string", string);
-		}
-		
-		// Update config
-		TestDatabase db = new TestDatabase();
-		db.executeFile("updateAppConfig");
-		
-		DateMocker.setCurrentDate(new Date(Dates.millis() + 100));
-		
-		Object updated = config.get("string.property");
-		assertEquals("updated", updated);
-		
-		Object neu = config.get("new.property");
-		assertEquals("newproperty", neu);
-	}
-	
-	@Test
-	public void testLoadExpiredEntryset() throws IOException {
-		config.load();
-		
-		assertEquals(5, config.entrySet().size());
-		DateMocker.setCurrentDate(new Date(Dates.millis() + 100));
-		assertEquals(5, config.entrySet().size());
+		assertEquals(3, config.cache.size());
+		assertTrue(config.cache.containsKey("key1"));
+		assertTrue(config.cache.containsKey("key2"));
+		assertTrue(config.cache.containsKey("key3"));
 	}
 }

@@ -2,15 +2,16 @@ package uk.co.lukestevens.config.models;
 
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import uk.co.lukestevens.config.Property;
 import uk.co.lukestevens.config.services.PropertyService;
-import uk.co.lukestevens.encryption.EncryptionService;
 
 
 /**
@@ -18,32 +19,32 @@ import uk.co.lukestevens.encryption.EncryptionService;
  * 
  * @author Luke Stevens
  */
-public class DatabaseConfig extends BaseConfig implements ConfigSource {
+public class DatabaseConfig extends BaseConfig{
 	
-	private final Map<String, Property> config = new HashMap<>();
-	private final PropertyService service;
+	final Map<String, Property> cache = new HashMap<>();
+	final PropertyService service;
 	
 	/**
 	 * Creates a new configuration by loading properties from a database using a service
 	 * @param service the PropertyService too use to load properties from the database
-	 * @param encryption The service to use to decrypt encrypted files
 	 */
-	public DatabaseConfig(PropertyService service, EncryptionService encryption) {
-		super(encryption);
+	@Inject
+	public DatabaseConfig(PropertyService service) {
 		this.service = service;	
 	}
 
 	@Override
 	public Set<Entry<Object, Object>> entrySet() {
-		return this.config.values()
+		return this.cache.values()
 				.stream()
+				.filter(prop -> !prop.isExpired())
 				.map(prop -> new AbstractMap.SimpleEntry<Object, Object>(prop.getKey(), prop.getValue()))
 				.collect(Collectors.toSet());
 	}
 
 	@Override
-	public Object get(String key) {
-		Property prop = this.config.get(key);
+	public String get(String key) {
+		Property prop = this.cache.get(key);
 		if(prop == null || prop.isExpired()) {
 			prop = this.service.get(key);
 		}
@@ -52,7 +53,7 @@ public class DatabaseConfig extends BaseConfig implements ConfigSource {
 			return null;
 		}
 		else {
-			this.config.put(key, prop);
+			this.cache.put(key, prop);
 			return prop.getValue();
 		}
 	}
@@ -60,7 +61,7 @@ public class DatabaseConfig extends BaseConfig implements ConfigSource {
 	@Override
 	public void load() throws IOException {
 		for(Property prop : service.load()) {
-			this.config.put(prop.getKey(), prop);
+			this.cache.put(prop.getKey(), prop);
 		}
 	}
 
